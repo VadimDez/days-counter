@@ -15,13 +15,17 @@ class ViewController: UIViewController {
     @IBOutlet weak var successButton: UIButton!
     @IBOutlet weak var resetButton: UIButton!
     var data: Data!
+    let dayInterval = 24 * 60 * 60;
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         self.loadData();
         self.update();
+        
+        self.resetInterval();
     }
+    
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
@@ -31,6 +35,7 @@ class ViewController: UIViewController {
     @IBAction func onSuccess(_ sender: Any) {
         self.data.count = self.data.count + 1;
         self.data.lastSuccessUpdate = Date.init();
+        self.enableButtonAfterInterval(timeInterval: TimeInterval(self.dayInterval));
         self.saveData();
         self.update();
     }
@@ -46,12 +51,16 @@ class ViewController: UIViewController {
     }
     
     func updateButton() -> Void {
-        self.successButton.isEnabled = self.data.lastSuccessUpdate == nil || self.data.lastSuccessUpdate.addingTimeInterval(24 * 60 * 60) <= Date.init();
+        self.successButton.isEnabled = self.data.lastSuccessUpdate == nil || self.data.lastSuccessUpdate.addingTimeInterval(TimeInterval(self.dayInterval)) <= Date.init();
     }
     
     func update() {
         self.updateLabel();
         self.updateButton();
+    }
+    
+    func enableButtonAfterInterval(timeInterval: TimeInterval) {
+        Timer.scheduledTimer(timeInterval: timeInterval, target: self, selector: #selector(ViewController.updateButton), userInfo: nil, repeats: false)
     }
     
     private func saveData() {
@@ -63,6 +72,25 @@ class ViewController: UIViewController {
             self.data = data;
         } else {
             self.data = Data(count: 0, lastSuccessUpdate: nil);
+        }
+    }
+    
+    private func getRemainingTime() -> Int {
+        let requestedComponent: Set<Calendar.Component> = [.day, .hour, .minute, .second]
+        let timeDifference = Calendar.current.dateComponents(requestedComponent, from: self.data.lastSuccessUpdate, to: Date.init())
+        
+        return timeDifference.second!
+            + timeDifference.minute! * 60
+            + timeDifference.hour! * 3600
+            + timeDifference.day! * 86400
+    }
+    
+    
+    func resetInterval() {
+        let diff = self.dayInterval - self.getRemainingTime();
+        
+        if diff > 0 {
+            self.enableButtonAfterInterval(timeInterval: TimeInterval(diff));
         }
     }
 }
