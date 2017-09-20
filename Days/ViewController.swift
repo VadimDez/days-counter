@@ -33,7 +33,7 @@ class ViewController: UIViewController {
     }
 
     @IBAction func onSuccess(_ sender: Any) {
-        self.data.count = self.data.count + 1;
+        self.data.count = self.data.count + UInt(1);
         self.data.lastSuccessUpdate = Date.init();
         self.enableButtonAfterInterval(timeInterval: TimeInterval(self.dayInterval));
         self.saveData();
@@ -41,6 +41,21 @@ class ViewController: UIViewController {
     }
 
     @IBAction func onReset(_ sender: Any) {
+        let alert = UIAlertController(title: "Reset", message: "Are you sure you want to reset counter?", preferredStyle: .alert);
+        
+        let sureAction = UIAlertAction(title: "Sure!", style: .default) { (action) in
+            self.reset();
+        }
+        
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { (action) in }
+        
+        alert.addAction(sureAction)
+        alert.addAction(cancelAction)
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
+    func reset() -> Void {
         self.data.reset();
         self.saveData();
         self.update();
@@ -87,6 +102,9 @@ class ViewController: UIViewController {
     
     
     func resetInterval() {
+        if self.data.lastSuccessUpdate == nil {
+            return;
+        }
         let diff = self.dayInterval - self.getRemainingTime();
         
         if diff > 0 {
