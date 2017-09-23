@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import os.log
+import UserNotifications
 
 class ViewController: UIViewController {
 
@@ -24,6 +24,7 @@ class ViewController: UIViewController {
         self.update();
         
         self.resetInterval();
+        self.initNotifications();
     }
     
 
@@ -109,6 +110,34 @@ class ViewController: UIViewController {
         
         if diff > 0 {
             self.enableButtonAfterInterval(timeInterval: TimeInterval(diff));
+        }
+    }
+    
+    func initNotifications() -> Void {
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound]) { (granted, error) in
+            self.setupNotificaitons();
+        }
+    }
+    
+    func setupNotificaitons() -> Void {
+        let center = UNUserNotificationCenter.current();
+
+        let content = UNMutableNotificationContent()
+        content.title = "Strick!";
+        content.body = "Was this day a successful day?";
+        content.badge = 1;
+        content.sound = UNNotificationSound.default();
+        
+        var dateComponent = DateComponents();
+        dateComponent.hour = 21;
+        dateComponent.minute = 0;
+        
+        let trigger  = UNCalendarNotificationTrigger(dateMatching: dateComponent, repeats: true);
+        let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger);
+        
+        center.removeAllPendingNotificationRequests();
+        center.add(request) { (error) in
+            
         }
     }
 }
