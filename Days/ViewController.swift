@@ -25,8 +25,6 @@ class ViewController: UIViewController {
         
         self.resetInterval();
         self.initNotifications();
-        
-        self.daysLabel.textColor = UIColor.black;
     }
     
 
@@ -73,15 +71,17 @@ class ViewController: UIViewController {
     }
     
     func update() {
-        self.animateBefore { (_) in
+        self.fade(alpha: 0) { (_) in
             self.updateLabel();
+            
+            self.fade(alpha: 1, completion: nil)
         }
         self.updateButton();
     }
     
-    func animateBefore(completion: @escaping (Bool) -> Void) -> Void {
-        UIView.animate(withDuration: 2, animations: {
-            self.daysLabel.textColor = UIColor.white;
+    func fade(alpha: CGFloat, completion: ((Bool) -> Void)?) -> Void {
+        UIView.animate(withDuration: 0.5, animations: {
+            self.daysLabel.alpha = alpha;
         }, completion: completion)
     }
     
